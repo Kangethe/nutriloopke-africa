@@ -1,0 +1,13 @@
+{
+  "name": "NutriLoop Africa",
+  "short_name": "NutriLoop",
+  "description": "Turning Nairobi's waste into protein and fertiliser.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0A1A0A",
+  "theme_color": "#2E7D32",
+  "icons": [
+    { "src": "/logo.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/logo.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

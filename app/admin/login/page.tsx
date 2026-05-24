@@ -2,12 +2,11 @@
 
 import { useState } from 'react'
 import { signIn } from 'next-auth/react'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useSearchParams } from 'next/navigation'
 import Image from 'next/image'
 import { Loader2, Lock, AlertCircle } from 'lucide-react'
 
 export default function AdminLoginPage() {
-  const router = useRouter()
   const searchParams = useSearchParams()
   const callbackUrl = searchParams.get('callbackUrl') ?? '/admin'
   const isError = searchParams.get('error') === 'CredentialsSignin'
@@ -34,8 +33,7 @@ export default function AdminLoginPage() {
     })
 
     if (result?.ok) {
-      router.push(callbackUrl)
-      router.refresh()
+      window.location.assign(callbackUrl)
     } else {
       setError('Invalid email or password. Please check your admin credentials.')
       setLoading(false)

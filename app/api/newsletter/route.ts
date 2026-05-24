@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import React from 'react'
 import { ZodError } from 'zod'
 import { NewsletterSchema } from '@/lib/utils/validators'
 import { rateLimitNewsletter } from '@/lib/utils/rate-limit'
@@ -146,18 +147,14 @@ export async function POST(
 
   // 6. Send welcome email (non-blocking — subscriber is saved regardless)
   const resend = getResendClient()
-  const welcomeResult = await Promise.allSettled([
+  await Promise.allSettled([
     resend.emails.send({
       from: FROM_EMAIL,
       to: data.email,
-      subject: 'You're in — NutriLoop Africa updates',
-      react: WelcomeNewsletterEmail({ subscriberEmail: data.email }),
+      subject: "You're in — NutriLoop Africa updates",
+      react: React.createElement(WelcomeNewsletterEmail, { subscriberEmail: data.email }),
     }),
   ])
-
-  if (welcomeResult[0]?.status === 'rejected') {
-    console.error('[/api/newsletter] Failed to send welcome email:', welcomeResult[0].reason)
-  }
 
   return NextResponse.json(
     {

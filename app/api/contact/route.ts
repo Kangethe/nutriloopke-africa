@@ -115,7 +115,7 @@ export async function POST(
     resend.emails.send({
       from: FROM_EMAIL,
       to: FOUNDER_EMAIL,
-      replyTo: data.email,
+      reply_to: data.email,
       subject: `[Contact] ${enquiryLabel} — ${data.name}${data.organisation ? ` (${data.organisation})` : ''}`,
       html: `
         <div style="font-family: system-ui, sans-serif; max-width: 600px; margin: 0 auto;">

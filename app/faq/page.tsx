@@ -8,8 +8,7 @@ export const metadata: Metadata = {
   description: 'Answers to the most common questions about NutriLoop Africa — Black Soldier Fly bioconversion, waste collection, BSF protein meal, frass fertiliser, and how to partner with us.',
 }
 
-export const FAQ_ITEMS = [
-  {
+const FAQ_ITEMS = [  {
     q: 'What is Black Soldier Fly (BSF) bioconversion?',
     a: 'Black Soldier Fly (Hermetia illucens) bioconversion is the process of using BSF larvae to consume and transform organic waste into high-value outputs. The larvae eat organic material — food waste, market produce, brewery grain — and convert it into their own body mass: 40–55% crude protein and 15–20% crude fat. The process takes 14 days. It is the most efficient organic waste processing technology known: BSF larvae convert feed 10–20× more efficiently than cattle, using no additional water and a fraction of the land.',
   },

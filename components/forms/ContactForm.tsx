@@ -68,7 +68,7 @@ export function ContactForm() {
             We respond to every message within 48 hours. If your matter is urgent, WhatsApp us directly.
           </p>
           <a
-            href="https://wa.me/254700000000"
+            href="https://wa.me/254705788160"
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-brand-green-700 hover:bg-brand-green-800 text-white text-sm font-semibold transition-colors"
@@ -229,7 +229,7 @@ export function ContactForm() {
             </button>
             <p className="mt-3 text-xs text-gray-400">
               We reply within 48 hours. For urgent matters:{' '}
-              <a href="https://wa.me/254700000000" target="_blank" rel="noopener noreferrer"
+              <a href="https://wa.me/254705788160" target="_blank" rel="noopener noreferrer"
                 className="text-brand-green-600 hover:underline">
                 WhatsApp us
               </a>.

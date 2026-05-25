@@ -217,12 +217,13 @@ function WasteSupplierTabForm({ onSuccess }: { onSuccess: (id: string, name: str
     resolver: zodResolver(WasteSupplierSchema),
   })
   const { submit, apiError } = useApplySubmit(onSuccess)
+  const onSubmitForm = handleSubmit((d) => submit({ ...d, type: 'waste_supplier' }))
 
   return (
-  <form onSubmit={handleSubmit((d) => submit({ ...d, type: 'waste_supplier' }))} noValidate>
-    <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-      <div className="sm:col-span-2">
-        <Label htmlFor="ws-org">Organisation name</Label>
+    <form onSubmit={onSubmitForm} noValidate>
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+        <div className="sm:col-span-2">
+          <Label htmlFor="ws-org">Organisation name</Label>
         <Input
           id="ws-org"
           autoComplete="organization"
@@ -253,7 +254,7 @@ function WasteSupplierTabForm({ onSuccess }: { onSuccess: (id: string, name: str
         />
       </div>
       <div>
-        <Label htmlFor="ws-phone" optional>Phone number</Label>
+        <Label htmlFor="ws-phone" >Phone number</Label>
         <Input
           id="ws-phone"
           autoComplete="tel"
@@ -330,9 +331,10 @@ function BuyerTabForm({ onSuccess }: { onSuccess: (id: string, name: string) => 
     resolver: zodResolver(BuyerSchema),
   })
   const { submit, apiError } = useApplySubmit(onSuccess)
+  const onSubmitForm = handleSubmit((d) => submit({ ...d, type: 'buyer' }))
 
   return (
-    <form onSubmit={handleSubmit((d) => submit({ ...d, type: 'buyer' }))} noValidate>
+    <form onSubmit={onSubmitForm} noValidate>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
         <div className="sm:col-span-2">
           <Label htmlFor="b-org">Organisation name</Label>
@@ -347,7 +349,7 @@ function BuyerTabForm({ onSuccess }: { onSuccess: (id: string, name: string) => 
           <Input id="b-email" type="email" placeholder="you@farm.com" error={errors.email} {...register('email')} />
         </div>
         <div>
-          <Label htmlFor="b-phone" >Phone number</Label>
+          <Label htmlFor="b-phone">Phone number</Label>
           <Input id="b-phone" type="tel" placeholder="+254 700 000 000" error={errors.phone} {...register('phone')} />
         </div>
         <div>
@@ -386,9 +388,10 @@ function InvestorTabForm({ onSuccess }: { onSuccess: (id: string, name: string) 
     resolver: zodResolver(InvestorSchema),
   })
   const { submit, apiError } = useApplySubmit(onSuccess)
+  const onSubmitForm = handleSubmit((d) => submit({ ...d, type: 'investor' }))
 
   return (
-    <form onSubmit={handleSubmit((d) => submit({ ...d, type: 'investor' }))} noValidate>
+    <form onSubmit={onSubmitForm} noValidate>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
         <div className="sm:col-span-2">
           <Label htmlFor="inv-org">Fund / Organisation name</Label>
@@ -403,7 +406,7 @@ function InvestorTabForm({ onSuccess }: { onSuccess: (id: string, name: string) 
           <Input id="inv-email" type="email" placeholder="you@fund.com" error={errors.email} {...register('email')} />
         </div>
         <div>
-          <Label htmlFor="inv-phone" optional>Phone number</Label>
+          <Label htmlFor="inv-phone" >Phone number</Label>
           <Input id="inv-phone" type="tel" placeholder="+254 700 000 000" error={errors.phone} {...register('phone')} />
         </div>
         <div>
@@ -450,8 +453,8 @@ function ResearchTabForm({ onSuccess }: { onSuccess: (id: string, name: string) 
   const { submit, apiError } = useApplySubmit(onSuccess)
 
   return (
-    <form onSubmit={handleSubmit((d) => submit({ ...d, type: 'research' }))} noValidate>
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+    <form onSubmit={handleSubmit(submit)} noValidate>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
         <div className="sm:col-span-2">
           <Label htmlFor="res-inst">Institution name</Label>
           <Input id="res-inst" placeholder="University, research centre, NGO…" error={errors.institution} {...register('institution')} />
@@ -465,7 +468,7 @@ function ResearchTabForm({ onSuccess }: { onSuccess: (id: string, name: string) 
           <Input id="res-email" type="email" placeholder="you@university.ac.ke" error={errors.email} {...register('email')} />
         </div>
         <div>
-          <Label htmlFor="res-phone" optional>Phone number</Label>
+          <Label htmlFor="res-phone" >Phone number</Label>
           <Input id="res-phone" type="tel" placeholder="+254 700 000 000" error={errors.phone} {...register('phone')} />
         </div>
         <div className="sm:col-span-2">
@@ -495,8 +498,8 @@ function MediaTabForm({ onSuccess }: { onSuccess: (id: string, name: string) => 
   const { submit, apiError } = useApplySubmit(onSuccess)
 
   return (
-    <form onSubmit={handleSubmit((d) => submit({ ...d, type: 'media' }))} noValidate>
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+<form onSubmit={handleSubmit(submit)} noValidate>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
         <div className="sm:col-span-2">
           <Label htmlFor="med-pub">Publication / outlet</Label>
           <Input id="med-pub" placeholder="Nation Media, Reuters, The EastAfrican…" error={errors.publication} {...register('publication')} />
@@ -510,7 +513,7 @@ function MediaTabForm({ onSuccess }: { onSuccess: (id: string, name: string) => 
           <Input id="med-email" type="email" placeholder="you@publication.com" error={errors.email} {...register('email')} />
         </div>
         <div>
-          <Label htmlFor="med-phone" optional>Phone number</Label>
+          <Label htmlFor="med-phone" >Phone number</Label>
           <Input id="med-phone" type="tel" placeholder="+254 700 000 000" error={errors.phone} {...register('phone')} />
         </div>
         <div>

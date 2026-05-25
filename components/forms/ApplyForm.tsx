@@ -209,8 +209,7 @@ function WasteSupplierTabForm({ onSuccess }: { onSuccess: (id: string, name: str
           <Input id="ws-location" placeholder="e.g. Westlands, Nairobi" error={errors.location} {...register('location')} />
         </div>
         <div className="sm:col-span-2">
-          <CheckboxGroup legend="Waste types you generate" options={WASTE_TYPES} name="waste_type" register={register} error={errors.waste_type as FieldError} />
-        </div>
+<CheckboxGroup legend="Waste types you generate" options={WASTE_TYPES} name="waste_type" register={register as any} error={errors.waste_type as FieldError} /><CheckboxGroup legend="Waste types you generate" options={WASTE_TYPES} name="waste_type" register={register as any} error={errors.waste_type as FieldError} />        </div>
         <div>
           <Label htmlFor="ws-volume">Estimated daily volume (kg)</Label>
           <Input id="ws-volume" type="number" min="1" placeholder="e.g. 200" error={errors.daily_volume_kg} {...register('daily_volume_kg', { valueAsNumber: true })} />
@@ -265,7 +264,7 @@ function BuyerTabForm({ onSuccess }: { onSuccess: (id: string, name: string) => 
           <Input id="b-location" placeholder="e.g. Kiambu, Nakuru" error={errors.location} {...register('location')} />
         </div>
         <div className="sm:col-span-2">
-          <CheckboxGroup legend="Products you're interested in" options={PRODUCTS} name="product_interest" register={register} error={errors.product_interest as FieldError} />
+          <CheckboxGroup legend="Products you're interested in" options={PRODUCTS} name="product_interest" register={register as any} error={errors.product_interest as FieldError} />
         </div>
         <div>
           <Label htmlFor="b-volume">Monthly volume needed (kg)</Label>

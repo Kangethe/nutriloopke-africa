@@ -1,6 +1,5 @@
 import type { Metadata } from 'next'
 import { Suspense } from 'react'
-import Link from 'next/link'
 import { ApplyForm } from '@/components/forms/ApplyForm'
 import { CheckCircle, Clock, Mail } from 'lucide-react'
 

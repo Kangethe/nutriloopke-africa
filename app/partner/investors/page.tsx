@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { PageHero } from '@/components/layout/PageHero'
-import { ArrowRight, CheckCircle, Download } from 'lucide-react'
+import { ArrowRight, CheckCircle } from 'lucide-react'
 
 export const metadata: Metadata = {
   title: 'For Investors & Funders — NutriLoop Africa',

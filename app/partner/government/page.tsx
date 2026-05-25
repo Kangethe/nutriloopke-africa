@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { PageHero } from '@/components/layout/PageHero'
-import { ArrowRight, CheckCircle, FileText } from 'lucide-react'
+import { ArrowRight, FileText } from 'lucide-react'
 
 export const metadata: Metadata = {
   title: 'For Government — NEMA, SWMA 2022, County Waste MOU',

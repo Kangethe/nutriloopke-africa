@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef, useEffect, Suspense } from 'react'
+import React, { useState, useRef, useEffect, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { useForm, type FieldError } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -47,44 +47,77 @@ const inputClass = (hasError?: boolean) =>
     hasError ? 'border-red-400 ring-1 ring-red-400' : 'border-gray-200 hover:border-gray-300'
   )
 
-function Input({
-  id, type = 'text', placeholder, error, disabled,
-  ...rest
-}: React.InputHTMLAttributes<HTMLInputElement> & { error?: FieldError }) {
-  return (
-    <>
-      <input id={id} type={type} placeholder={placeholder} disabled={disabled}
-        className={inputClass(!!error)} {...rest} />
-      <FieldError error={error} />
-    </>
-  )
-}
+const Input = React.forwardRef<
+  HTMLInputElement,
+  React.InputHTMLAttributes<HTMLInputElement> & { error?: FieldError }
+>(
+  ({ id, type = 'text', placeholder, error, disabled, ...rest }, ref) => {
+    return (
+      <>
+        <input
+          id={id}
+          type={type}
+          placeholder={placeholder}
+          disabled={disabled}
+          className={inputClass(!!error)}
+          ref={ref}
+          {...rest}
+        />
+        <FieldError error={error} />
+      </>
+    )
+  }
+)
 
-function Textarea({
-  id, placeholder, rows = 4, error, disabled, ...rest
-}: React.TextareaHTMLAttributes<HTMLTextAreaElement> & { error?: FieldError }) {
-  return (
-    <>
-      <textarea id={id} rows={rows} placeholder={placeholder} disabled={disabled}
-        className={cn(inputClass(!!error), 'resize-none')} {...rest} />
-      <FieldError error={error} />
-    </>
-  )
-}
+Input.displayName = 'Input'
 
-function Select({
-  id, children, error, disabled, ...rest
-}: React.SelectHTMLAttributes<HTMLSelectElement> & { error?: FieldError }) {
-  return (
-    <>
-      <select id={id} disabled={disabled}
-        className={cn(inputClass(!!error), 'cursor-pointer')} {...rest}>
-        {children}
-      </select>
-      <FieldError error={error} />
-    </>
-  )
-}
+const Textarea = React.forwardRef<
+  HTMLTextAreaElement,
+  React.TextareaHTMLAttributes<HTMLTextAreaElement> & { error?: FieldError }
+>(
+  ({ id, placeholder, rows = 4, error, disabled, ...rest }, ref) => {
+    return (
+      <>
+        <textarea
+          id={id}
+          rows={rows}
+          placeholder={placeholder}
+          disabled={disabled}
+          className={cn(inputClass(!!error), 'resize-none')}
+          ref={ref}
+          {...rest}
+        />
+        <FieldError error={error} />
+      </>
+    )
+  }
+)
+
+Textarea.displayName = 'Textarea'
+
+const Select = React.forwardRef<
+  HTMLSelectElement,
+  React.SelectHTMLAttributes<HTMLSelectElement> & { error?: FieldError }
+>(
+  ({ id, children, error, disabled, ...rest }, ref) => {
+    return (
+      <>
+        <select
+          id={id}
+          disabled={disabled}
+          className={cn(inputClass(!!error), 'cursor-pointer')}
+          ref={ref}
+          {...rest}
+        >
+          {children}
+        </select>
+        <FieldError error={error} />
+      </>
+    )
+  }
+)
+
+Select.displayName = 'Select'
 
 function CheckboxGroup({
   legend, options, name, register, error, disabled,
@@ -186,47 +219,105 @@ function WasteSupplierTabForm({ onSuccess }: { onSuccess: (id: string, name: str
   const { submit, apiError } = useApplySubmit(onSuccess)
 
   return (
-    <form onSubmit={handleSubmit((d) => submit({ ...d, type: 'waste_supplier' }))} noValidate>
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-        <div className="sm:col-span-2">
-          <Label htmlFor="ws-org">Organisation name</Label>
-          <Input id="ws-org" placeholder="Nairobi Hilton, Kenyatta National Hospital…" error={errors.organisation_name} {...register('organisation_name')} />
-        </div>
-        <div>
-          <Label htmlFor="ws-contact">Contact name</Label>
-          <Input id="ws-contact" placeholder="Your full name" error={errors.contact_name} {...register('contact_name')} />
-        </div>
-        <div>
-          <Label htmlFor="ws-email">Email address</Label>
-          <Input id="ws-email" type="email" placeholder="you@organisation.com" error={errors.email} {...register('email')} />
-        </div>
-        <div>
-          <Label htmlFor="ws-phone" optional>Phone number</Label>
-          <Input id="ws-phone" type="tel" placeholder="+254 700 000 000" error={errors.phone} {...register('phone')} />
-        </div>
-        <div>
-          <Label htmlFor="ws-location">Location / area</Label>
-          <Input id="ws-location" placeholder="e.g. Westlands, Nairobi" error={errors.location} {...register('location')} />
-        </div>
-        <div className="sm:col-span-2">
-<CheckboxGroup legend="Waste types you generate" options={WASTE_TYPES} name="waste_type" register={register as any} error={errors.waste_type as FieldError} /><CheckboxGroup legend="Waste types you generate" options={WASTE_TYPES} name="waste_type" register={register as any} error={errors.waste_type as FieldError} />        </div>
-        <div>
-          <Label htmlFor="ws-volume">Estimated daily volume (kg)</Label>
-          <Input id="ws-volume" type="number" min="1" placeholder="e.g. 200" error={errors.daily_volume_kg} {...register('daily_volume_kg', { valueAsNumber: true })} />
-        </div>
-        <div>
-          <Label htmlFor="ws-addr">Collection address</Label>
-          <Input id="ws-addr" placeholder="Full street address for pickup" error={errors.collection_address} {...register('collection_address')} />
-        </div>
-        <div className="sm:col-span-2">
-          <Label htmlFor="ws-notes" optional>Additional notes</Label>
-          <Textarea id="ws-notes" placeholder="Anything else we should know about your waste stream…" rows={3} error={errors.notes} {...register('notes')} />
-        </div>
+  <form onSubmit={handleSubmit((d) => submit({ ...d, type: 'waste_supplier' }))} noValidate>
+    <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+      <div className="sm:col-span-2">
+        <Label htmlFor="ws-org">Organisation name</Label>
+        <Input
+          id="ws-org"
+          autoComplete="organization"
+          placeholder="Nairobi Hilton, Kenyatta National Hospital…"
+          error={errors.organisation_name}
+          {...register('organisation_name')}
+        />
       </div>
-      {apiError && <ApiErrorBanner message={apiError} />}
-      <SubmitButton loading={isSubmitting} />
-    </form>
-  )
+      <div>
+        <Label htmlFor="ws-contact">Contact name</Label>
+        <Input
+          id="ws-contact"
+          autoComplete="name"
+          placeholder="Your full name"
+          error={errors.contact_name}
+          {...register('contact_name')}
+        />
+      </div>
+      <div>
+        <Label htmlFor="ws-email">Email address</Label>
+        <Input
+          id="ws-email"
+          autoComplete="email"
+          type="email"
+          placeholder="you@organisation.com"
+          error={errors.email}
+          {...register('email')}
+        />
+      </div>
+      <div>
+        <Label htmlFor="ws-phone" optional>Phone number</Label>
+        <Input
+          id="ws-phone"
+          autoComplete="tel"
+          type="tel"
+          placeholder="+254 700 000 000"
+          error={errors.phone}
+          {...register('phone')}
+        />
+      </div>
+      <div>
+        <Label htmlFor="ws-location">Location / area</Label>
+        <Input
+          id="ws-location"
+          autoComplete="address-level2"
+          placeholder="e.g. Westlands, Nairobi"
+          error={errors.location}
+          {...register('location')}
+        />
+      </div>
+      <div className="sm:col-span-2">
+        <CheckboxGroup
+          legend="Waste types you generate"
+          options={WASTE_TYPES}
+          name="waste_type"
+          register={register as any}
+          error={errors.waste_type as FieldError}
+        />
+      </div>
+      <div>
+        <Label htmlFor="ws-volume">Estimated daily volume (kg)</Label>
+        <Input
+          id="ws-volume"
+          type="number"
+          min="1"
+          placeholder="e.g. 200"
+          error={errors.daily_volume_kg}
+          {...register('daily_volume_kg', { valueAsNumber: true })}
+        />
+      </div>
+      <div>
+        <Label htmlFor="ws-addr">Collection address</Label>
+        <Input
+          id="ws-addr"
+          autoComplete="street-address"
+          placeholder="Full street address for pickup"
+          error={errors.collection_address}
+          {...register('collection_address')}
+        />
+      </div>
+      <div className="sm:col-span-2">
+        <Label htmlFor="ws-notes" optional>Additional notes</Label>
+        <Textarea
+          id="ws-notes"
+          placeholder="Anything else we should know about your waste stream…"
+          rows={3}
+          error={errors.notes}
+          {...register('notes')}
+        />
+      </div>
+    </div>
+    {apiError && <ApiErrorBanner message={apiError} />}
+    <SubmitButton loading={isSubmitting} />
+  </form>
+)
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -256,7 +347,7 @@ function BuyerTabForm({ onSuccess }: { onSuccess: (id: string, name: string) => 
           <Input id="b-email" type="email" placeholder="you@farm.com" error={errors.email} {...register('email')} />
         </div>
         <div>
-          <Label htmlFor="b-phone" optional>Phone number</Label>
+          <Label htmlFor="b-phone" >Phone number</Label>
           <Input id="b-phone" type="tel" placeholder="+254 700 000 000" error={errors.phone} {...register('phone')} />
         </div>
         <div>

@@ -541,7 +541,6 @@ function MediaTabForm({ onSuccess }: { onSuccess: (id: string, name: string) => 
 
 function SubmitButton({ loading, label = 'Submit application' }: { loading: boolean; label?: string }) {
   const [isSubmitting, setIsSubmitting] = useState(false);
-
 const handleClick = async (e: React.MouseEvent<HTMLButtonElement>) => {
   if (loading || isSubmitting) return;
 

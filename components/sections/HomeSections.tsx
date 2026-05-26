@@ -213,8 +213,7 @@ export function PartnerCTASection() {
             Your move.
           </h2>
           <p className="text-white/50 text-lg max-w-xl mx-auto mb-12">
-            Whether your waste is their opportunity, your feed bill is their product, or your fund is their fuel — there is a role for you in this loop.
-          </p>
+The loop isn’t whole without you. Turn your waste into a resource. Let us cut Kenya’s food and feed bill. To investors, your capital is the engine of change andwith it, we scale the solution. Let us join hands, transform waste, and sustain the future.          </p>
         </motion.div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

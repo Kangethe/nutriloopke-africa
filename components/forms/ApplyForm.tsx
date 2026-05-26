@@ -68,6 +68,7 @@ const Input = React.forwardRef<
     )
   }
 )
+
 Input.displayName = 'Input'
 
 const Textarea = React.forwardRef<
@@ -91,6 +92,7 @@ const Textarea = React.forwardRef<
     )
   }
 )
+
 Textarea.displayName = 'Textarea'
 
 const Select = React.forwardRef<
@@ -114,6 +116,7 @@ const Select = React.forwardRef<
     )
   }
 )
+
 Select.displayName = 'Select'
 
 function CheckboxGroup({
@@ -214,51 +217,110 @@ function WasteSupplierTabForm({ onSuccess }: { onSuccess: (id: string, name: str
     resolver: zodResolver(WasteSupplierSchema),
   })
   const { submit, apiError } = useApplySubmit(onSuccess)
-  const onSubmitForm = handleSubmit((d) => submit({ ...d, type: 'waste_supplier' }))
-
+const onSubmitForm = handleSubmit((d) => {
+  console.log('Submit triggered!', d);
+  return submit({ ...d, type: 'waste_supplier' });
+});
   return (
     <form onSubmit={onSubmitForm} noValidate>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
         <div className="sm:col-span-2">
           <Label htmlFor="ws-org">Organisation name</Label>
-          <Input id="ws-org" autoComplete="organization" placeholder="Nairobi Hilton, Kenyatta National Hospital…" error={errors.organisation_name} {...register('organisation_name')} />
-        </div>
-        <div>
-          <Label htmlFor="ws-contact">Contact name</Label>
-          <Input id="ws-contact" autoComplete="name" placeholder="Your full name" error={errors.contact_name} {...register('contact_name')} />
-        </div>
-        <div>
-          <Label htmlFor="ws-email">Email address</Label>
-          <Input id="ws-email" autoComplete="email" type="email" placeholder="you@organisation.com" error={errors.email} {...register('email')} />
-        </div>
-        <div>
-          <Label htmlFor="ws-phone" optional>Phone number</Label>
-          <Input id="ws-phone" autoComplete="tel" type="tel" placeholder="+254 700 000 000" error={errors.phone} {...register('phone')} />
-        </div>
-        <div>
-          <Label htmlFor="ws-location">Location / area</Label>
-          <Input id="ws-location" autoComplete="address-level2" placeholder="e.g. Westlands, Nairobi" error={errors.location} {...register('location')} />
-        </div>
-        <div className="sm:col-span-2">
-          <CheckboxGroup legend="Waste types you generate" options={WASTE_TYPES} name="waste_type" register={register as any} error={errors.waste_type as FieldError} />
-        </div>
-        <div>
-          <Label htmlFor="ws-volume">Estimated daily volume (kg)</Label>
-          <Input id="ws-volume" type="number" min="1" placeholder="e.g. 200" error={errors.daily_volume_kg} {...register('daily_volume_kg', { valueAsNumber: true })} />
-        </div>
-        <div>
-          <Label htmlFor="ws-addr">Collection address</Label>
-          <Input id="ws-addr" autoComplete="street-address" placeholder="Full street address for pickup" error={errors.collection_address} {...register('collection_address')} />
-        </div>
-        <div className="sm:col-span-2">
-          <Label htmlFor="ws-notes" optional>Additional notes</Label>
-          <Textarea id="ws-notes" placeholder="Anything else we should know about your waste stream…" rows={3} error={errors.notes} {...register('notes')} />
-        </div>
+        <Input
+          id="ws-org"
+          autoComplete="organization"
+          placeholder="Nairobi Hilton, Kenyatta National Hospital…"
+          error={errors.organisation_name}
+          {...register('organisation_name')}
+        />
       </div>
-      {apiError && <ApiErrorBanner message={apiError} />}
-      <SubmitButton loading={isSubmitting} />
-    </form>
-  )
+      <div>
+        <Label htmlFor="ws-contact">Contact name</Label>
+        <Input
+          id="ws-contact"
+          autoComplete="name"
+          placeholder="Your full name"
+          error={errors.contact_name}
+          {...register('contact_name')}
+        />
+      </div>
+      <div>
+        <Label htmlFor="ws-email">Email address</Label>
+        <Input
+          id="ws-email"
+          autoComplete="email"
+          type="email"
+          placeholder="you@organisation.com"
+          error={errors.email}
+          {...register('email')}
+        />
+      </div>
+      <div>
+        <Label htmlFor="ws-phone" >Phone number</Label>
+        <Input
+          id="ws-phone"
+          autoComplete="tel"
+          type="tel"
+          placeholder="+254 700 000 000"
+          error={errors.phone}
+          {...register('phone')}
+        />
+      </div>
+      <div>
+        <Label htmlFor="ws-location">Location / area</Label>
+        <Input
+          id="ws-location"
+          autoComplete="address-level2"
+          placeholder="e.g. Westlands, Nairobi"
+          error={errors.location}
+          {...register('location')}
+        />
+      </div>
+      <div className="sm:col-span-2">
+        <CheckboxGroup
+          legend="Waste types you generate"
+          options={WASTE_TYPES}
+          name="waste_type"
+          register={register as any}
+          error={errors.waste_type as FieldError}
+        />
+      </div>
+      <div>
+        <Label htmlFor="ws-volume">Estimated daily volume (kg)</Label>
+        <Input
+          id="ws-volume"
+          type="number"
+          min="1"
+          placeholder="e.g. 200"
+          error={errors.daily_volume_kg}
+          {...register('daily_volume_kg', { valueAsNumber: true })}
+        />
+      </div>
+      <div>
+        <Label htmlFor="ws-addr">Collection address</Label>
+        <Input
+          id="ws-addr"
+          autoComplete="street-address"
+          placeholder="Full street address for pickup"
+          error={errors.collection_address}
+          {...register('collection_address')}
+        />
+      </div>
+      <div className="sm:col-span-2">
+        <Label htmlFor="ws-notes" optional>Additional notes</Label>
+        <Textarea
+          id="ws-notes"
+          placeholder="Anything else we should know about your waste stream…"
+          rows={3}
+          error={errors.notes}
+          {...register('notes')}
+        />
+      </div>
+    </div>
+    {apiError && <ApiErrorBanner message={apiError} />}
+    <SubmitButton loading={isSubmitting} />
+  </form>
+)
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -346,7 +408,7 @@ function InvestorTabForm({ onSuccess }: { onSuccess: (id: string, name: string) 
           <Input id="inv-email" type="email" placeholder="you@fund.com" error={errors.email} {...register('email')} />
         </div>
         <div>
-          <Label htmlFor="inv-phone" optional>Phone number</Label>
+          <Label htmlFor="inv-phone" >Phone number</Label>
           <Input id="inv-phone" type="tel" placeholder="+254 700 000 000" error={errors.phone} {...register('phone')} />
         </div>
         <div>
@@ -478,11 +540,20 @@ function MediaTabForm({ onSuccess }: { onSuccess: (id: string, name: string) => 
 // ─────────────────────────────────────────────────────────────────────────────
 
 function SubmitButton({ loading, label = 'Submit application' }: { loading: boolean; label?: string }) {
+  const handleClick = async (e: React.MouseEvent<HTMLButtonElement>) => {
+    if (loading) return;
+    const form = e.currentTarget.closest('form');
+    if (form) {
+      form.requestSubmit(); // this triggers the form's submit event (React's onSubmit)
+    }
+  };
+
   return (
     <div className="mt-7 pt-5 border-t border-gray-100">
       <button
         type="submit"
         disabled={loading}
+        onClick={handleClick}
         className="w-full sm:w-auto flex items-center justify-center gap-2.5 px-8 py-3.5 rounded-xl bg-brand-amber-700 hover:bg-brand-amber-800 text-white font-semibold text-sm transition-all duration-200 hover:-translate-y-px hover:shadow-lg hover:shadow-brand-amber-900/20 disabled:opacity-50 disabled:pointer-events-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-amber-500 focus-visible:ring-offset-2"
       >
         {loading ? (
@@ -494,15 +565,6 @@ function SubmitButton({ loading, label = 'Submit application' }: { loading: bool
       <p className="mt-3 text-xs text-gray-400">
         We respond to every application within 48 hours. No spam, ever.
       </p>
-    </div>
-  )
-}
-
-function ApiErrorBanner({ message }: { message: string }) {
-  return (
-    <div className="mt-5 flex items-start gap-3 px-4 py-3.5 rounded-xl bg-red-50 border border-red-200" role="alert">
-      <AlertCircle size={16} className="text-red-500 flex-shrink-0 mt-0.5" />
-      <p className="text-sm text-red-700">{message}</p>
     </div>
   )
 }
@@ -581,6 +643,7 @@ function ApplyFormInner() {
   const [activeTab, setActiveTab] = useState<ApplicationType>(initialTab)
   const [success, setSuccess] = useState<{ id: string; name: string } | null>(null)
 
+  // Sync tab with URL param changes
   useEffect(() => {
     const t = searchParams.get('tab')
     if (isValidTab(t)) setActiveTab(t)
@@ -592,6 +655,7 @@ function ApplyFormInner() {
 
   return (
     <div className="w-full max-w-2xl mx-auto">
+      {/* Tab bar */}
       {!success && (
         <div className="flex flex-wrap gap-2 mb-8" role="tablist" aria-label="Application type">
           {TABS.map((tab) => (
@@ -615,6 +679,7 @@ function ApplyFormInner() {
         </div>
       )}
 
+      {/* Panel card */}
       <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
         {success ? (
           <SuccessScreen name={success.name} applicationId={success.id} type={activeTab} />
@@ -652,6 +717,10 @@ function ApplyFormInner() {
     </div>
   )
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Public export — wraps inner component in Suspense (required for useSearchParams)
+// ─────────────────────────────────────────────────────────────────────────────
 
 function FormSkeleton() {
   return (

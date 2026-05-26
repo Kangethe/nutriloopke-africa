@@ -540,23 +540,76 @@ function MediaTabForm({ onSuccess }: { onSuccess: (id: string, name: string) => 
 // ─────────────────────────────────────────────────────────────────────────────
 
 function SubmitButton({ loading, label = 'Submit application' }: { loading: boolean; label?: string }) {
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   const handleClick = async (e: React.MouseEvent<HTMLButtonElement>) => {
-    if (loading) return;
+    if (loading || isSubmitting) return;
+
     const form = e.currentTarget.closest('form');
-    if (form) {
-      form.requestSubmit(); // this triggers the form's submit event (React's onSubmit)
+    if (!form) {
+      console.error('No form found');
+      return;
+    }
+
+    // Collect all form data manually
+    const formData = new FormData(form);
+    const payload: Record<string, any> = {};
+
+    formData.forEach((value, key) => {
+      // Handle checkbox arrays (e.g., waste_type, product_interest)
+      if (key === 'waste_type' || key === 'product_interest') {
+        if (!payload[key]) payload[key] = [];
+        payload[key].push(value);
+      } else {
+        // For normal inputs, take the last value (should be only one)
+        payload[key] = value;
+      }
+    });
+
+    // Determine the application type from the active tab
+    const activeTabElement = document.querySelector('[role="tab"][aria-selected="true"]');
+    let type = 'waste_supplier';
+    if (activeTabElement) {
+      const tabText = activeTabElement.textContent?.toLowerCase() || '';
+      if (tabText.includes('buyer')) type = 'buyer';
+      else if (tabText.includes('investor')) type = 'investor';
+      else if (tabText.includes('research')) type = 'research';
+      else if (tabText.includes('media')) type = 'media';
+    }
+    payload.type = type;
+
+    setIsSubmitting(true);
+    try {
+      const res = await fetch('/api/apply', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      const data = await res.json();
+      if (data.success && data.data) {
+        // Reload the page to show the success screen (or you can manually update state)
+        // The success state is managed by the parent, but for simplicity, reload.
+        window.location.reload();
+      } else {
+        alert(data.error || 'Submission failed. Please try again.');
+      }
+    } catch (err) {
+      console.error(err);
+      alert('Could not connect to the server. Please check your internet.');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   return (
     <div className="mt-7 pt-5 border-t border-gray-100">
       <button
-        type="submit"
-        disabled={loading}
+        type="button"  // important: not type="submit" to avoid default form behavior
+        disabled={loading || isSubmitting}
         onClick={handleClick}
         className="w-full sm:w-auto flex items-center justify-center gap-2.5 px-8 py-3.5 rounded-xl bg-brand-amber-700 hover:bg-brand-amber-800 text-white font-semibold text-sm transition-all duration-200 hover:-translate-y-px hover:shadow-lg hover:shadow-brand-amber-900/20 disabled:opacity-50 disabled:pointer-events-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-amber-500 focus-visible:ring-offset-2"
       >
-        {loading ? (
+        {loading || isSubmitting ? (
           <><Loader2 size={16} className="animate-spin" /> Submitting…</>
         ) : (
           <>{label} <ChevronRight size={16} /></>

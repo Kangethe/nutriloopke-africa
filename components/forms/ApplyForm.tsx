@@ -542,64 +542,61 @@ function MediaTabForm({ onSuccess }: { onSuccess: (id: string, name: string) => 
 function SubmitButton({ loading, label = 'Submit application' }: { loading: boolean; label?: string }) {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleClick = async (e: React.MouseEvent<HTMLButtonElement>) => {
-    if (loading || isSubmitting) return;
+const handleClick = async (e: React.MouseEvent<HTMLButtonElement>) => {
+  if (loading || isSubmitting) return;
 
-    const form = e.currentTarget.closest('form');
-    if (!form) {
-      console.error('No form found');
-      return;
+  const form = e.currentTarget.closest('form');
+  if (!form) {
+    console.error('No form found');
+    return;
+  }
+
+  const formData = new FormData(form);
+  const payload: Record<string, any> = {};
+
+  formData.forEach((value, key) => {
+    // Convert numeric fields to numbers
+    if (key === 'daily_volume_kg' || key === 'monthly_volume_kg') {
+      payload[key] = Number(value);
+    } else if (key === 'waste_type' || key === 'product_interest') {
+      if (!payload[key]) payload[key] = [];
+      payload[key].push(value);
+    } else {
+      payload[key] = value;
     }
+  });
 
-    // Collect all form data manually
-    const formData = new FormData(form);
-    const payload: Record<string, any> = {};
+  const activeTabElement = document.querySelector('[role="tab"][aria-selected="true"]');
+  let type = 'waste_supplier';
+  if (activeTabElement) {
+    const tabText = activeTabElement.textContent?.toLowerCase() || '';
+    if (tabText.includes('buyer')) type = 'buyer';
+    else if (tabText.includes('investor')) type = 'investor';
+    else if (tabText.includes('research')) type = 'research';
+    else if (tabText.includes('media')) type = 'media';
+  }
+  payload.type = type;
 
-    formData.forEach((value, key) => {
-      // Handle checkbox arrays (e.g., waste_type, product_interest)
-      if (key === 'waste_type' || key === 'product_interest') {
-        if (!payload[key]) payload[key] = [];
-        payload[key].push(value);
-      } else {
-        // For normal inputs, take the last value (should be only one)
-        payload[key] = value;
-      }
+  setIsSubmitting(true);
+  try {
+    const res = await fetch('/api/apply', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
     });
-
-    // Determine the application type from the active tab
-    const activeTabElement = document.querySelector('[role="tab"][aria-selected="true"]');
-    let type = 'waste_supplier';
-    if (activeTabElement) {
-      const tabText = activeTabElement.textContent?.toLowerCase() || '';
-      if (tabText.includes('buyer')) type = 'buyer';
-      else if (tabText.includes('investor')) type = 'investor';
-      else if (tabText.includes('research')) type = 'research';
-      else if (tabText.includes('media')) type = 'media';
+    const data = await res.json();
+    if (data.success && data.data) {
+      window.location.reload();
+    } else {
+      alert(data.error || 'Submission failed. Please try again.');
     }
-    payload.type = type;
-
-    setIsSubmitting(true);
-    try {
-      const res = await fetch('/api/apply', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      });
-      const data = await res.json();
-      if (data.success && data.data) {
-        // Reload the page to show the success screen (or you can manually update state)
-        // The success state is managed by the parent, but for simplicity, reload.
-        window.location.reload();
-      } else {
-        alert(data.error || 'Submission failed. Please try again.');
-      }
-    } catch (err) {
-      console.error(err);
-      alert('Could not connect to the server. Please check your internet.');
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
+  } catch (err) {
+    console.error(err);
+    alert('Could not connect to the server. Please check your internet.');
+  } finally {
+    setIsSubmitting(false);
+  }
+};
 
   return (
     <div className="mt-7 pt-5 border-t border-gray-100">

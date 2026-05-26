@@ -68,7 +68,6 @@ const Input = React.forwardRef<
     )
   }
 )
-
 Input.displayName = 'Input'
 
 const Textarea = React.forwardRef<
@@ -92,7 +91,6 @@ const Textarea = React.forwardRef<
     )
   }
 )
-
 Textarea.displayName = 'Textarea'
 
 const Select = React.forwardRef<
@@ -116,11 +114,15 @@ const Select = React.forwardRef<
     )
   }
 )
-
 Select.displayName = 'Select'
 
 function CheckboxGroup({
-  legend, options, name, register, error, disabled,
+  legend,
+  options,
+  name,
+  register,
+  error,
+  disabled,
 }: {
   legend: string
   options: { value: string; label: string }[]
@@ -154,6 +156,19 @@ function CheckboxGroup({
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
+// Shared error banner (used by old tabs – but we no longer use it; kept for completeness)
+// ─────────────────────────────────────────────────────────────────────────────
+
+function ApiErrorBanner({ message }: { message: string }) {
+  return (
+    <div className="mt-5 flex items-start gap-3 px-4 py-3.5 rounded-xl bg-red-50 border border-red-200" role="alert">
+      <AlertCircle size={16} className="text-red-500 flex-shrink-0 mt-0.5" />
+      <p className="text-sm text-red-700">{message}</p>
+    </div>
+  )
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 // Shared field groups
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -174,169 +189,132 @@ const PRODUCTS = [
 ]
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Shared submit hook
-// ─────────────────────────────────────────────────────────────────────────────
-
-function useApplySubmit(onSuccess: (id: string, name: string) => void) {
-  const [apiError, setApiError] = useState<string | null>(null)
-
-  const submit = async (payload: Record<string, unknown>) => {
-    setApiError(null)
-    try {
-      const res = await fetch('/api/apply', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      })
-      const data = (await res.json()) as {
-        success: boolean
-        data?: { id: string }
-        message?: string
-        error?: string
-      }
-      if (data.success && data.data) {
-        onSuccess(data.data.id, (payload.contact_name as string) ?? '')
-      } else {
-        setApiError(data.error ?? 'Something went wrong. Please try again.')
-      }
-    } catch {
-      setApiError('Could not connect. Please check your connection and try again.')
-    }
-  }
-
-  return { submit, apiError, clearError: () => setApiError(null) }
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Tab 1 — Waste Supplier
+// Tab 1 — Waste Supplier (direct fetch, no useApplySubmit)
 // ─────────────────────────────────────────────────────────────────────────────
 
 function WasteSupplierTabForm({ onSuccess }: { onSuccess: (id: string, name: string) => void }) {
   type F = Extract<ApplyFormInput, { type: 'waste_supplier' }>
-  const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<F>({
+  const { register, formState: { errors, isSubmitting } } = useForm<F>({
     resolver: zodResolver(WasteSupplierSchema),
   })
-  const { submit, apiError } = useApplySubmit(onSuccess)
-const onSubmitForm = handleSubmit((d) => {
-  console.log('Submit triggered!', d);
-  return submit({ ...d, type: 'waste_supplier' });
-});
+
   return (
-    <form onSubmit={onSubmitForm} noValidate>
+    <form onSubmit={(e) => e.preventDefault()} noValidate>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
         <div className="sm:col-span-2">
           <Label htmlFor="ws-org">Organisation name</Label>
-        <Input
-          id="ws-org"
-          autoComplete="organization"
-          placeholder="Nairobi Hilton, Kenyatta National Hospital…"
-          error={errors.organisation_name}
-          {...register('organisation_name')}
-        />
+          <Input
+            id="ws-org"
+            autoComplete="organization"
+            placeholder="Nairobi Hilton, Kenyatta National Hospital…"
+            error={errors.organisation_name}
+            {...register('organisation_name')}
+          />
+        </div>
+        <div>
+          <Label htmlFor="ws-contact">Contact name</Label>
+          <Input
+            id="ws-contact"
+            autoComplete="name"
+            placeholder="Your full name"
+            error={errors.contact_name}
+            {...register('contact_name')}
+          />
+        </div>
+        <div>
+          <Label htmlFor="ws-email">Email address</Label>
+          <Input
+            id="ws-email"
+            autoComplete="email"
+            type="email"
+            placeholder="you@organisation.com"
+            error={errors.email}
+            {...register('email')}
+          />
+        </div>
+        <div>
+          <Label htmlFor="ws-phone">Phone number</Label>
+          <Input
+            id="ws-phone"
+            autoComplete="tel"
+            type="tel"
+            placeholder="+254 700 000 000"
+            error={errors.phone}
+            {...register('phone')}
+          />
+        </div>
+        <div>
+          <Label htmlFor="ws-location">Location / area</Label>
+          <Input
+            id="ws-location"
+            autoComplete="address-level2"
+            placeholder="e.g. Westlands, Nairobi"
+            error={errors.location}
+            {...register('location')}
+          />
+        </div>
+        <div className="sm:col-span-2">
+          <CheckboxGroup
+            legend="Waste types you generate"
+            options={WASTE_TYPES}
+            name="waste_type"
+            register={register as any}
+            error={errors.waste_type as FieldError}
+          />
+        </div>
+        <div>
+          <Label htmlFor="ws-volume">Estimated daily volume (kg)</Label>
+          <Input
+            id="ws-volume"
+            type="number"
+            min="1"
+            placeholder="e.g. 200"
+            error={errors.daily_volume_kg}
+            {...register('daily_volume_kg', { valueAsNumber: true })}
+          />
+        </div>
+        <div>
+          <Label htmlFor="ws-addr">Collection address</Label>
+          <Input
+            id="ws-addr"
+            autoComplete="street-address"
+            placeholder="Full street address for pickup"
+            error={errors.collection_address}
+            {...register('collection_address')}
+          />
+        </div>
+        <div className="sm:col-span-2">
+          <Label htmlFor="ws-notes" optional>Additional notes</Label>
+          <Textarea
+            id="ws-notes"
+            placeholder="Anything else we should know about your waste stream…"
+            rows={3}
+            error={errors.notes}
+            {...register('notes')}
+          />
+        </div>
       </div>
-      <div>
-        <Label htmlFor="ws-contact">Contact name</Label>
-        <Input
-          id="ws-contact"
-          autoComplete="name"
-          placeholder="Your full name"
-          error={errors.contact_name}
-          {...register('contact_name')}
-        />
-      </div>
-      <div>
-        <Label htmlFor="ws-email">Email address</Label>
-        <Input
-          id="ws-email"
-          autoComplete="email"
-          type="email"
-          placeholder="you@organisation.com"
-          error={errors.email}
-          {...register('email')}
-        />
-      </div>
-      <div>
-        <Label htmlFor="ws-phone" >Phone number</Label>
-        <Input
-          id="ws-phone"
-          autoComplete="tel"
-          type="tel"
-          placeholder="+254 700 000 000"
-          error={errors.phone}
-          {...register('phone')}
-        />
-      </div>
-      <div>
-        <Label htmlFor="ws-location">Location / area</Label>
-        <Input
-          id="ws-location"
-          autoComplete="address-level2"
-          placeholder="e.g. Westlands, Nairobi"
-          error={errors.location}
-          {...register('location')}
-        />
-      </div>
-      <div className="sm:col-span-2">
-        <CheckboxGroup
-          legend="Waste types you generate"
-          options={WASTE_TYPES}
-          name="waste_type"
-          register={register as any}
-          error={errors.waste_type as FieldError}
-        />
-      </div>
-      <div>
-        <Label htmlFor="ws-volume">Estimated daily volume (kg)</Label>
-        <Input
-          id="ws-volume"
-          type="number"
-          min="1"
-          placeholder="e.g. 200"
-          error={errors.daily_volume_kg}
-          {...register('daily_volume_kg', { valueAsNumber: true })}
-        />
-      </div>
-      <div>
-        <Label htmlFor="ws-addr">Collection address</Label>
-        <Input
-          id="ws-addr"
-          autoComplete="street-address"
-          placeholder="Full street address for pickup"
-          error={errors.collection_address}
-          {...register('collection_address')}
-        />
-      </div>
-      <div className="sm:col-span-2">
-        <Label htmlFor="ws-notes" optional>Additional notes</Label>
-        <Textarea
-          id="ws-notes"
-          placeholder="Anything else we should know about your waste stream…"
-          rows={3}
-          error={errors.notes}
-          {...register('notes')}
-        />
-      </div>
-    </div>
-    {apiError && <ApiErrorBanner message={apiError} />}
-    <SubmitButton loading={isSubmitting} />
-  </form>
-)
+      <SubmitButton
+        loading={isSubmitting}
+        onSuccess={onSuccess}
+        getContactName={(payload) => payload.contact_name as string}
+      />
+    </form>
+  )
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Tab 2 — Buyer
+// Tab 2 — Buyer (direct fetch)
 // ─────────────────────────────────────────────────────────────────────────────
 
 function BuyerTabForm({ onSuccess }: { onSuccess: (id: string, name: string) => void }) {
   type F = Extract<ApplyFormInput, { type: 'buyer' }>
-  const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<F>({
+  const { register, formState: { errors, isSubmitting } } = useForm<F>({
     resolver: zodResolver(BuyerSchema),
   })
-  const { submit, apiError } = useApplySubmit(onSuccess)
-  const onSubmitForm = handleSubmit((d) => submit({ ...d, type: 'buyer' }))
 
   return (
-    <form onSubmit={onSubmitForm} noValidate>
+    <form onSubmit={(e) => e.preventDefault()} noValidate>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
         <div className="sm:col-span-2">
           <Label htmlFor="b-org">Organisation name</Label>
@@ -374,26 +352,27 @@ function BuyerTabForm({ onSuccess }: { onSuccess: (id: string, name: string) => 
           <Textarea id="b-notes" placeholder="Feed species, current supplier, quality requirements…" rows={3} error={errors.notes} {...register('notes')} />
         </div>
       </div>
-      {apiError && <ApiErrorBanner message={apiError} />}
-      <SubmitButton loading={isSubmitting} />
+      <SubmitButton
+        loading={isSubmitting}
+        onSuccess={onSuccess}
+        getContactName={(payload) => payload.contact_name as string}
+      />
     </form>
   )
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Tab 3 — Investor
+// Tab 3 — Investor (direct fetch)
 // ─────────────────────────────────────────────────────────────────────────────
 
 function InvestorTabForm({ onSuccess }: { onSuccess: (id: string, name: string) => void }) {
   type F = Extract<ApplyFormInput, { type: 'investor' }>
-  const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<F>({
+  const { register, formState: { errors, isSubmitting } } = useForm<F>({
     resolver: zodResolver(InvestorSchema),
   })
-  const { submit, apiError } = useApplySubmit(onSuccess)
-  const onSubmitForm = handleSubmit((d) => submit({ ...d, type: 'investor' }))
 
   return (
-    <form onSubmit={onSubmitForm} noValidate>
+    <form onSubmit={(e) => e.preventDefault()} noValidate>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
         <div className="sm:col-span-2">
           <Label htmlFor="inv-org">Fund / Organisation name</Label>
@@ -408,7 +387,7 @@ function InvestorTabForm({ onSuccess }: { onSuccess: (id: string, name: string) 
           <Input id="inv-email" type="email" placeholder="you@fund.com" error={errors.email} {...register('email')} />
         </div>
         <div>
-          <Label htmlFor="inv-phone" >Phone number</Label>
+          <Label htmlFor="inv-phone">Phone number</Label>
           <Input id="inv-phone" type="tel" placeholder="+254 700 000 000" error={errors.phone} {...register('phone')} />
         </div>
         <div>
@@ -437,26 +416,28 @@ function InvestorTabForm({ onSuccess }: { onSuccess: (id: string, name: string) 
           <Textarea id="inv-notes" placeholder="Mandate details, co-investors, specific questions for the founders…" rows={3} error={errors.notes} {...register('notes')} />
         </div>
       </div>
-      {apiError && <ApiErrorBanner message={apiError} />}
-      <SubmitButton loading={isSubmitting} label="Request investor brief" />
+      <SubmitButton
+        loading={isSubmitting}
+        onSuccess={onSuccess}
+        getContactName={(payload) => payload.contact_name as string}
+        label="Request investor brief"
+      />
     </form>
   )
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Tab 4 — Research Partner
+// Tab 4 — Research Partner (direct fetch)
 // ─────────────────────────────────────────────────────────────────────────────
 
 function ResearchTabForm({ onSuccess }: { onSuccess: (id: string, name: string) => void }) {
   type F = Extract<ApplyFormInput, { type: 'research' }>
-  const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<F>({
+  const { register, formState: { errors, isSubmitting } } = useForm<F>({
     resolver: zodResolver(ResearchSchema),
   })
-  const { submit, apiError } = useApplySubmit(onSuccess)
-  const onSubmitForm = handleSubmit((d) => submit({ ...d, type: 'research' }))
 
   return (
-    <form onSubmit={onSubmitForm} noValidate>
+    <form onSubmit={(e) => e.preventDefault()} noValidate>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
         <div className="sm:col-span-2">
           <Label htmlFor="res-inst">Institution name</Label>
@@ -483,26 +464,28 @@ function ResearchTabForm({ onSuccess }: { onSuccess: (id: string, name: string) 
           <Textarea id="res-notes" placeholder="Funding status, timeline, co-investigators…" rows={3} error={errors.notes} {...register('notes')} />
         </div>
       </div>
-      {apiError && <ApiErrorBanner message={apiError} />}
-      <SubmitButton loading={isSubmitting} label="Apply for research access" />
+      <SubmitButton
+        loading={isSubmitting}
+        onSuccess={onSuccess}
+        getContactName={(payload) => payload.contact_name as string}
+        label="Apply for research access"
+      />
     </form>
   )
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Tab 5 — Media
+// Tab 5 — Media (direct fetch)
 // ─────────────────────────────────────────────────────────────────────────────
 
 function MediaTabForm({ onSuccess }: { onSuccess: (id: string, name: string) => void }) {
   type F = Extract<ApplyFormInput, { type: 'media' }>
-  const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<F>({
+  const { register, formState: { errors, isSubmitting } } = useForm<F>({
     resolver: zodResolver(MediaSchema),
   })
-  const { submit, apiError } = useApplySubmit(onSuccess)
-  const onSubmitForm = handleSubmit((d) => submit({ ...d, type: 'media' }))
 
   return (
-    <form onSubmit={onSubmitForm} noValidate>
+    <form onSubmit={(e) => e.preventDefault()} noValidate>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
         <div className="sm:col-span-2">
           <Label htmlFor="med-pub">Publication / outlet</Label>
@@ -529,78 +512,93 @@ function MediaTabForm({ onSuccess }: { onSuccess: (id: string, name: string) => 
           <Textarea id="med-angle" placeholder="Describe the story you are working on and what you need from NutriLoop Africa…" rows={4} error={errors.story_angle} {...register('story_angle')} />
         </div>
       </div>
-      {apiError && <ApiErrorBanner message={apiError} />}
-      <SubmitButton loading={isSubmitting} label="Send press enquiry" />
+      <SubmitButton
+        loading={isSubmitting}
+        onSuccess={onSuccess}
+        getContactName={(payload) => payload.contact_name as string}
+        label="Send press enquiry"
+      />
     </form>
   )
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Shared submit button + error banner
+// Shared submit button (direct fetch)
 // ─────────────────────────────────────────────────────────────────────────────
 
-function SubmitButton({ loading, label = 'Submit application' }: { loading: boolean; label?: string }) {
+function SubmitButton({ 
+  loading, 
+  label = 'Submit application', 
+  onSuccess, 
+  getContactName 
+}: { 
+  loading: boolean; 
+  label?: string; 
+  onSuccess: (id: string, name: string) => void;
+  getContactName: (payload: Record<string, any>) => string;
+}) {
   const [isSubmitting, setIsSubmitting] = useState(false);
-const handleClick = async (e: React.MouseEvent<HTMLButtonElement>) => {
-  if (loading || isSubmitting) return;
 
-  const form = e.currentTarget.closest('form');
-  if (!form) {
-    console.error('No form found');
-    return;
-  }
+  const handleClick = async (e: React.MouseEvent<HTMLButtonElement>) => {
+    if (loading || isSubmitting) return;
 
-  const formData = new FormData(form);
-  const payload: Record<string, any> = {};
-
-  formData.forEach((value, key) => {
-    // Convert numeric fields to numbers
-    if (key === 'daily_volume_kg' || key === 'monthly_volume_kg') {
-      payload[key] = Number(value);
-    } else if (key === 'waste_type' || key === 'product_interest') {
-      if (!payload[key]) payload[key] = [];
-      payload[key].push(value);
-    } else {
-      payload[key] = value;
+    const form = e.currentTarget.closest('form');
+    if (!form) {
+      console.error('No form found');
+      return;
     }
-  });
 
-  const activeTabElement = document.querySelector('[role="tab"][aria-selected="true"]');
-  let type = 'waste_supplier';
-  if (activeTabElement) {
-    const tabText = activeTabElement.textContent?.toLowerCase() || '';
-    if (tabText.includes('buyer')) type = 'buyer';
-    else if (tabText.includes('investor')) type = 'investor';
-    else if (tabText.includes('research')) type = 'research';
-    else if (tabText.includes('media')) type = 'media';
-  }
-  payload.type = type;
+    const formData = new FormData(form);
+    const payload: Record<string, any> = {};
 
-  setIsSubmitting(true);
-  try {
-    const res = await fetch('/api/apply', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload),
+    formData.forEach((value, key) => {
+      if (key === 'daily_volume_kg' || key === 'monthly_volume_kg') {
+        payload[key] = Number(value);
+      } else if (key === 'waste_type' || key === 'product_interest') {
+        if (!payload[key]) payload[key] = [];
+        payload[key].push(value);
+      } else {
+        payload[key] = value;
+      }
     });
-    const data = await res.json();
-    if (data.success && data.data) {
-      window.location.reload();
-    } else {
-      alert(data.error || 'Submission failed. Please try again.');
+
+    const activeTabElement = document.querySelector('[role="tab"][aria-selected="true"]');
+    let type = 'waste_supplier';
+    if (activeTabElement) {
+      const tabText = activeTabElement.textContent?.toLowerCase() || '';
+      if (tabText.includes('buyer')) type = 'buyer';
+      else if (tabText.includes('investor')) type = 'investor';
+      else if (tabText.includes('research')) type = 'research';
+      else if (tabText.includes('media')) type = 'media';
     }
-  } catch (err) {
-    console.error(err);
-    alert('Could not connect to the server. Please check your internet.');
-  } finally {
-    setIsSubmitting(false);
-  }
-};
+    payload.type = type;
+
+    setIsSubmitting(true);
+    try {
+      const res = await fetch('/api/apply', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      const data = await res.json();
+      if (data.success && data.data) {
+        const contactName = getContactName(payload);
+        onSuccess(data.data.id, contactName);
+      } else {
+        alert(data.error || 'Submission failed. Please try again.');
+      }
+    } catch (err) {
+      console.error(err);
+      alert('Could not connect to the server. Please check your internet.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   return (
     <div className="mt-7 pt-5 border-t border-gray-100">
       <button
-        type="button"  // important: not type="submit" to avoid default form behavior
+        type="button"
         disabled={loading || isSubmitting}
         onClick={handleClick}
         className="w-full sm:w-auto flex items-center justify-center gap-2.5 px-8 py-3.5 rounded-xl bg-brand-amber-700 hover:bg-brand-amber-800 text-white font-semibold text-sm transition-all duration-200 hover:-translate-y-px hover:shadow-lg hover:shadow-brand-amber-900/20 disabled:opacity-50 disabled:pointer-events-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-amber-500 focus-visible:ring-offset-2"
@@ -615,7 +613,7 @@ const handleClick = async (e: React.MouseEvent<HTMLButtonElement>) => {
         We respond to every application within 48 hours. No spam, ever.
       </p>
     </div>
-  )
+  );
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
